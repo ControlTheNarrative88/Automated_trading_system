@@ -1,0 +1,2 @@
+# stratproj
+Aut. trading strategies 
