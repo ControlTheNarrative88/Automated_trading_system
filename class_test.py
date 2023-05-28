@@ -1,14 +1,15 @@
 from openbb_terminal.sdk import openbb
 from nltk.sentiment import SentimentIntensityAnalyzer
+from config import fred_key, finnhub_key
 
-openbb.keys.fred(key = '07b18df77070f808b8a7976f27910ee4', persist = True)
-openbb.keys.finnhub(key = "c2j894iad3ib3m9cept0")
+openbb.keys.fred(key = fred_key, persist = True)
+openbb.keys.finnhub(key = finnhub_key)
 
 
 class Stock:
 
 
-    def load_stock_data(self):
+    def load_stock_data(self, return_tail=False):
         data  =  openbb.stocks.load(self, start_date="2020-09-01")
         openbb.forecast.delete(data, "Dividends")
         openbb.forecast.delete(data, "Stock Splits")
@@ -16,19 +17,20 @@ class Stock:
         openbb.forecast.ema(data, target_column = 'Adj Close', period = 50)
         openbb.forecast.ema(data, target_column = 'Adj Close', period = 200)
         openbb.forecast.rsi(data, target_column = 'Adj Close', period = 14)
-        ## table = data.tail(1)
+        if return_tail:
+            return data.tail(1)
         return data
     
     
     def overbought_or_oversold(self):
-        data = Stock.load_stock_data(self)
+        data = Stock.load_stock_data(self, return_tail = True)
         ema200 = data['EMA_200']
         rsi = data['RSI_14_Adj Close']
         curr_price = data["Adj Close"]
         if float(ema200) >= float(curr_price):
             print("EMA 200 Oversold")
         else:
-            print("EMA 200 Overbought")
+            print("EMA 200 Overbought", ",", ((((curr_price/ema200) - 1) * 100)).item(),"% higher than price")
         if float(rsi) >= 70:
             print ("RSI Overbought", float(rsi))
         elif float(rsi) <= 30:
@@ -37,9 +39,10 @@ class Stock:
             print(f"RSI === {float(rsi)}")
 
 
-    def balance_sheet_diff():
+    def balance_sheet_diff(print_chart = False):
 
-        openbb.economy.fred_chart(series_ids=["WALCL"], start_date="2020-05-01")
+        if print_chart:
+            openbb.economy.fred_chart(series_ids=["WALCL"], start_date="2020-05-01")
         fed_balance = openbb.economy.fred(series_ids=["WALCL"], start_date="2020-05-01")
         df = fed_balance[-2]
 
@@ -64,13 +67,13 @@ class Stock:
         ema  = openbb.ta.ema(data)
         return ema
 
-    def get_macd(self):
+    def get_macd(self, chart = False):
 
         data = Stock.load_stock_data(self)
         data = data["Adj Close"]
         macd_table = openbb.ta.macd(data = data, n_fast = 12, n_slow  = 26, n_signal = 9)
         macd_chart = openbb.ta.macd_chart(data = data, n_fast = 12, n_slow  = 26, n_signal = 9)
-        return macd_table.tail(5), macd_chart
+        return macd_table
     
     def get_rsi(self):
         df = Stock.load_stock_data(self) 
