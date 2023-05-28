@@ -2,8 +2,9 @@ from openbb_terminal.sdk import openbb
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from class_test import Stock
 
-def Supertrend(df, atr_period, multiplier):
+def supertrend(df, atr_period, multiplier):
     
     high = df['High']
     low = df['Low']
@@ -13,6 +14,7 @@ def Supertrend(df, atr_period, multiplier):
     price_diffs = [high - low, 
                    high - close.shift(), 
                    close.shift() - low]
+
     true_range = pd.concat(price_diffs, axis=1)
     true_range = true_range.abs().max(axis=1)
     # default ATR calculation in supertrend indicator
@@ -28,7 +30,8 @@ def Supertrend(df, atr_period, multiplier):
     
     # initialize Supertrend column to True
     supertrend = [True] * len(df)
-    
+
+        
     for i in range(1, len(df.index)):
         curr, prev = i, i-1
         
@@ -54,23 +57,64 @@ def Supertrend(df, atr_period, multiplier):
         else:
             final_lowerband[curr] = np.nan
     
+        if supertrend[curr] != supertrend[prev]:
+            trend_change = (df.index[curr], supertrend[prev], supertrend[curr])
+            trend_changes.append(trend_change)
+
     return pd.DataFrame({
         'Supertrend': supertrend,
         'Final Lowerband': final_lowerband,
         'Final Upperband': final_upperband
     }, index=df.index)
     
-    
+
+trend_changes = []
+
 atr_period = 10
 atr_multiplier = 3.0
 
-df = openbb.stocks.load("AMD", start_date = "2022-09-01")
+def supertrend_result_print(ticker):
 
-supertrend = Supertrend(df, atr_period, atr_multiplier)
-df = df.join(supertrend)
 
-plt.plot(df['Close'], label='Close Price')
-plt.plot(df['Final Lowerband'], 'g', label = 'Final Lowerband')
-plt.plot(df['Final Upperband'], 'r', label = 'Final Upperband')
-plt.legend()
-plt.show()
+    df = openbb.stocks.load(ticker, start_date = "2022-09-01")
+
+    supertrend_result = supertrend(df, atr_period, atr_multiplier)
+    df = df.join(supertrend_result)
+
+    plt.plot(df['Close'], label='Close Price')
+    plt.plot(df['Final Lowerband'], 'g', label = 'Final Lowerband')
+    plt.plot(df['Final Upperband'], 'r', label = 'Final Upperband')
+    plt.legend()
+    plt.show()
+
+
+    previous_trend_label = "Upper"
+    current_trend_label = "Down"
+
+    for change in trend_changes:
+        previous_trend = previous_trend_label if change[1] else current_trend_label
+        current_trend = previous_trend_label if change[2] else current_trend_label
+        print(f"Date: {change[0]}, Previous Trend: {previous_trend}, Current Trend: {current_trend}")
+
+
+def iterate_throught_sbp_list():
+
+    spb_stock_list = Stock.get_spb_ticker_list()
+    spb_stock_list = spb_stock_list[:100]
+
+
+    supertrend_stocks = []
+
+    for symbol in spb_stock_list:
+        df = openbb.stocks.load(symbol, start_date='2023-01-01')
+        if len(df) == 0: continue
+        supertrend_df = supertrend(df, atr_period, atr_multiplier)
+        if not supertrend_df['Supertrend'][-2] and supertrend_df['Supertrend'][-1]:
+            supertrend_stocks.append(symbol)
+
+    return supertrend_stocks
+
+list = iterate_throught_sbp_list()
+
+for stock in list:
+    supertrend_result_print(stock)

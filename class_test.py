@@ -1,10 +1,10 @@
 from openbb_terminal.sdk import openbb
 from nltk.sentiment import SentimentIntensityAnalyzer
 from config import fred_key, finnhub_key
+import csv
 
 openbb.keys.fred(key = fred_key, persist = True)
 openbb.keys.finnhub(key = finnhub_key)
-
 
 class Stock:
 
@@ -20,6 +20,12 @@ class Stock:
         if return_tail:
             return data.tail(1)
         return data
+
+
+    def get_symbol_list_from_index(index_ticker):
+        etf = openbb.etf.holdings(index_ticker)
+        symbol_list = etf.index.tolist()
+        return symbol_list
     
     
     def overbought_or_oversold(self):
@@ -117,3 +123,22 @@ class Stock:
     def build_brnn_forecast(self):
         df = Stock.load_stock_data(self)
         openbb.forecast.brnn_chart(data = df, target_column="Adj Close", n_predict = 5)
+
+
+    def get_spb_ticker_list():
+
+        with open("ListingSecurityList.csv", 'r') as file:
+            csv_reader = csv.reader(file, delimiter=';', skipinitialspace=True)
+            next(csv_reader)  # Skip the header row
+
+            list_of_rows = []
+            for row in csv_reader:
+                list_of_rows.append(row)
+
+        spb_ticker_list = []
+        for elem in range(len(list_of_rows)):
+            if list_of_rows[int(elem)][-1] == "Эмитенты с листингом в США":
+                spb_ticker_list.append(list_of_rows[elem][1])
+
+        return spb_ticker_list
+
