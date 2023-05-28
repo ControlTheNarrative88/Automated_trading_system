@@ -48,9 +48,7 @@ class MacdStrategy(Strategy):
 
     def next(self):
         
-        price = self.data.Close[-1]
-        print(price)
-            
+           
         if crossover(self.macd_main, self.macd_signal) and self.macd_signal < 0 and self.macd_main < 0:
         
             if self.position.is_short:
@@ -72,5 +70,3 @@ bt = Backtest(MacdStrategy.data, MacdStrategy, cash=10_000, commission=.002)
 stats = bt.run()
 print(stats)
 #bt.plot()
-
-нихуя не работает сл и тп
