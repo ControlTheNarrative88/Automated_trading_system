@@ -83,7 +83,7 @@ class Supertrend:
         
 
     
-    def supertrend_result_print(ticker, print_plt=True, start_date = "2020-09-01"):
+    def supertrend_result_print(ticker, print_plt=True, start_date = "2020-08-29"):
 
         df = openbb.stocks.load(ticker, start_date = start_date)
         supertrend_result = Supertrend.supertrend(df, Supertrend.atr_period, Supertrend.atr_multiplier)

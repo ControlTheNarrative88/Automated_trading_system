@@ -11,7 +11,7 @@ class SupertrendStrategy(Strategy):
 
     data = openbb.stocks.load("SPY", start_date="2020-09-01")
 
-    Supertrend.supertrend_result_print("SPY", print_plt=False)
+    Supertrend.supertrend_result_print("SPY", print_plt=False, start_date = "2020-06-01")
 
     def supertrend_status():
         trend_changes = Supertrend.trend_changes
@@ -30,27 +30,28 @@ class SupertrendStrategy(Strategy):
         final_df = final_df.drop('Date', axis=1)
         return final_df
 
-    @staticmethod
-    def is_value(df, date):
-        if date in df.index:
-            value = df.loc[date, 'Current Trend']
-            return True
-        else:
-            return False
-
     def init(self):
-        # Initialize variables
-        self.supertrend = self.I(SupertrendStrategy.supertrend_status)
+        self.supertrend = self.I(SupertrendStrategy.extrapotale_status)
+
 
     def next(self):
+
         if self.supertrend == True:
+
+            if self.position.is_short:
+                self.position.close()
+
             self.buy()
+
         elif self.supertrend == False:
+
+            if self.position.is_long:
+                self.position.close()
+                
             self.sell()
 
-""" 
+
 bt = Backtest(SupertrendStrategy.data, SupertrendStrategy, cash=10_000, commission=.002)
 stats = bt.run()
 print(stats)
 bt.plot()
- """
