@@ -129,7 +129,7 @@ class Stock:
 
         with open("ListingSecurityList.csv", 'r') as file:
             csv_reader = csv.reader(file, delimiter=';', skipinitialspace=True)
-            next(csv_reader)  # Skip the header row
+            next(csv_reader) 
 
             list_of_rows = []
             for row in csv_reader:

@@ -64,9 +64,7 @@ class MacdStrategy(Strategy):
 
             self.sell()
 
-
-
-bt = Backtest(MacdStrategy.data, MacdStrategy, cash=10_000, commission=.002)
-stats = bt.run()
-print(stats)
+#bt = Backtest(MacdStrategy.data, MacdStrategy, cash=10_000, commission=.002)
+#stats = bt.run()
+#print(stats)
 #bt.plot()
