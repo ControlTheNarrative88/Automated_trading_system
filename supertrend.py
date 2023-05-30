@@ -9,7 +9,7 @@ class Supertrend:
 
     trend_changes = []
     atr_period = 10
-    atr_multiplier = 3.0
+    atr_multiplier = 3
     start_date = "2020-06-01"
     bands = pd.DataFrame()
 
