@@ -9,13 +9,13 @@ class MacdStrategy(Strategy):
 
     start_date = datetime.datetime(2020, 9, 1)
 
-    data = openbb.stocks.load("AMD", start_date=start_date)
+    data = openbb.stocks.load("SPY", start_date=start_date)
     openbb.forecast.delete(data, "Dividends")
     openbb.forecast.delete(data, "Stock Splits")
 
     date_for_macd = start_date - datetime.timedelta(days = 47)
 
-    data_for_macd = openbb.stocks.load("AMD", start_date=date_for_macd)
+    data_for_macd = openbb.stocks.load("SPY", start_date=date_for_macd)
 
     data_for_macd = data_for_macd["Close"]
 
@@ -64,7 +64,7 @@ class MacdStrategy(Strategy):
 
             self.sell()
 
-#bt = Backtest(MacdStrategy.data, MacdStrategy, cash=10_000, commission=.002)
-#stats = bt.run()
-#print(stats)
+bt = Backtest(MacdStrategy.data, MacdStrategy, cash=10_000, commission=.002)
+stats = bt.run()
+print(stats)
 #bt.plot()
