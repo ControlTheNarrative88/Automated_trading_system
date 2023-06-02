@@ -1,4 +1,3 @@
-from class_test import Stock
 from openbb_terminal.sdk import openbb
 from backtesting import Strategy
 from backtesting import Backtest
@@ -67,4 +66,4 @@ class MacdStrategy(Strategy):
 bt = Backtest(MacdStrategy.data, MacdStrategy, cash=10_000, commission=.002)
 stats = bt.run()
 print(stats)
-#bt.plot()
+bt.plot()
