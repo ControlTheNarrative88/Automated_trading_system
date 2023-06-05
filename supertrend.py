@@ -13,7 +13,7 @@ class Supertrend:
     start_date = "2020-06-01"
     bands = pd.DataFrame()
 
-    def supertrend(df, atr_period, multiplier):
+    def supertrend(df, atr_period=10, multiplier=3):
 
         trend_changes = []
 
@@ -74,18 +74,23 @@ class Supertrend:
         }, index=df.index)
         
 
-    
-    def supertrend_result_print(ticker, print_plt=True, start_date = "2020-08-29"):
+    def supertrend_result_print(ticker=None, print_plt=True, start_date = "2020-08-29", for_crypto=False, dataframe = None):
 
-        df = openbb.stocks.load(ticker, start_date = start_date)
-        supertrend_result = Supertrend.supertrend(df, Supertrend.atr_period, Supertrend.atr_multiplier)
-        df = df.join(supertrend_result)
+        if for_crypto:
+            supertrend_result = Supertrend.supertrend(dataframe, atr_period=10, multiplier=3)
+            dataframe = dataframe.join(supertrend_result)
+            dataframe.set_index('Time', inplace=True)
+            dataframe.index = dataframe.index.strftime('%H:%M')
+        else:   
+            dataframe = openbb.stocks.load(ticker, start_date = start_date)
+            supertrend_result = Supertrend.supertrend(dataframe, Supertrend.atr_period, Supertrend.atr_multiplier)
+            dataframe = dataframe.join(supertrend_result)
 
         # построение графика
         if print_plt:
-            plt.plot(df['Close'], label='Close Price')
-            plt.plot(df['Final Lowerband'], 'g', label = 'Final Lowerband')
-            plt.plot(df['Final Upperband'], 'r', label = 'Final Upperband')
+            plt.plot(dataframe['Close'], label='Close Price')
+            plt.plot(dataframe['Final Lowerband'], 'g', label = 'Final Lowerband')
+            plt.plot(dataframe['Final Upperband'], 'r', label = 'Final Upperband')
             plt.legend()
             plt.show()
 
