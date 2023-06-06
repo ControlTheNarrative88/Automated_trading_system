@@ -73,13 +73,22 @@ class Stock:
         ema  = openbb.ta.ema(data)
         return ema
 
-    def get_macd(self, chart = False):
+    @staticmethod
+    def get_macd(ticker=None, chart = False, for_crypto = False, dataframe = None):
 
-        data = Stock.load_stock_data(self)
-        data = data["Adj Close"]
-        macd_table = openbb.ta.macd(data = data, n_fast = 12, n_slow  = 26, n_signal = 9)
-        macd_chart = openbb.ta.macd_chart(data = data, n_fast = 12, n_slow  = 26, n_signal = 9)
-        return macd_table
+        if for_crypto:
+            data = dataframe["Close"]
+            macd_table = openbb.ta.macd(data = data, n_fast = 12, n_slow  = 26, n_signal = 9)
+            if chart:
+                openbb.ta.macd_chart(data = data, n_fast = 12, n_slow  = 26, n_signal = 9)
+            return macd_table
+        else:
+            data = Stock.load_stock_data(ticker)
+            data = data["Adj Close"]
+            macd_table = openbb.ta.macd(data = data, n_fast = 12, n_slow  = 26, n_signal = 9)
+            if chart:
+                openbb.ta.macd_chart(data = data, n_fast = 12, n_slow  = 26, n_signal = 9)
+            return macd_table
     
     def get_rsi(self):
         df = Stock.load_stock_data(self) 
@@ -125,6 +134,7 @@ class Stock:
         openbb.forecast.brnn_chart(data = df, target_column="Adj Close", n_predict = 5)
 
 
+    @staticmethod
     def get_spb_ticker_list():
 
         with open("ListingSecurityList.csv", 'r') as file:

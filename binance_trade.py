@@ -1,15 +1,18 @@
 from config import binance_api_key, binance_secret_key
+from openbb_terminal.sdk import openbb
 from binance import Client
 import pandas as pd
 import datetime
 from supertrend import Supertrend
 import time
-import numpy as np
+from class_test import Stock
+from backtesting.lib import crossover
 
 client = Client(binance_api_key, binance_secret_key)
 class Trade:
 
-    status = None
+    supertrend_status = None
+    macd_status = None
 
     def get_coin_data(self, limit=60):
 
@@ -38,7 +41,7 @@ class Trade:
         return trade_status
 
 
-def foo(ticker):
+def supertrend_monitor(ticker):
  
     while True:
         
@@ -54,17 +57,42 @@ def foo(ticker):
 
 
         if current == previous and current == "Upper":
-            Trade.status = True
+            Trade.supertrend_status = True
  
         elif current == previous and current == "Down":
-            Trade.status = False
+            Trade.supertrend_status = False
 
         elif previous != current and current == "Upper":
-            Trade.status = True
+            Trade.supertrend_status = True
             print("changed to Upper")
 
         elif previous != current and current == "Down":
-            Trade.status = False
+            Trade.supertrend_status = False
             print("changed to down")
         
         time.sleep(59)      
+
+
+def macd_monitor(ticker):
+
+    while True:
+
+        df = Trade.get_coin_data(ticker)
+        df.rename(columns={'Time': 'date'}, inplace=True)
+        df.set_index('date', inplace=True)
+
+        macd_data = Stock.get_macd(for_crypto=True, dataframe = df, chart=True)
+
+        main_line = macd_data['MACD_12_26_9'].values
+        signal_line = macd_data['MACDs_12_26_9'].values
+
+        if crossover(main_line, signal_line) and signal_line[0] < 0 and main_line[0] < 0:
+            Trade.macd_status = True
+
+        elif crossover(signal_line, main_line) and signal_line[0] > 0 and main_line[0] > 0:
+            Trade.macd_status = False
+        else: 
+            Trade.macd_status = None
+
+        print(Trade.macd_status)
+        time.sleep(59)
