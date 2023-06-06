@@ -13,6 +13,7 @@ class Trade:
 
     supertrend_status = None
     macd_status = None
+    rsi_status = None
 
     def get_coin_data(self, limit=60):
 
@@ -95,4 +96,24 @@ def macd_monitor(ticker):
             Trade.macd_status = None
 
         print(Trade.macd_status)
+        time.sleep(59)
+
+
+def rsi_monitor(ticker):
+
+    while True:
+            
+        df = Trade.get_coin_data(ticker)
+        df.rename(columns={'Time': 'date'}, inplace=True)
+        df.set_index('date', inplace=True)
+        df = df["Close"]
+
+        rsi_data = Stock.get_rsi(for_crypto=True, dataframe = df)
+
+        if rsi_data > float(68):
+            Trade.rsi_status = False
+        elif rsi_data < float(32):
+            Trade.rsi_status = True
+
+        print(Trade.rsi_status, rsi_data)
         time.sleep(59)

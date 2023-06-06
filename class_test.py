@@ -90,8 +90,15 @@ class Stock:
                 openbb.ta.macd_chart(data = data, n_fast = 12, n_slow  = 26, n_signal = 9)
             return macd_table
     
-    def get_rsi(self):
-        df = Stock.load_stock_data(self) 
+    @staticmethod
+    def get_rsi(ticker= None, for_crypto = False, dataframe = None):
+
+        if for_crypto:
+            rsi_num = openbb.ta.rsi(data = dataframe, window=14)
+            rsi_num = rsi_num['RSI_14'].iloc[-1]
+            return rsi_num
+        
+        df = Stock.load_stock_data(ticker) 
         df = df["Adj Close"]
         rsi_num = openbb.ta.rsi(data = df, window = 14)
         rsi_num = rsi_num['RSI_14'].iloc[-1]
